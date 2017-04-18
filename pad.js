@@ -52,6 +52,22 @@ function unblock(id) {
 	$('#content_div_'+id).removeClass('content_block').addClass('content_div');
 }
 
+function change(id,text) {
+	$('#content_div_'+id).html(text);
+	$('#content_text_'+id).html(text);
+	
+}
+
+function addline(id,newid,text) {
+	$('#content_'+id).after('<div id="content_'+newid+'" class="content">				<div id="content_div_'+newid+'" class="content_block">'+text +'</div>				<textarea id="content_text_'+newid+'" class="content_text" style="display:none;">'+text +'</textarea>			</div>');
+}
+
+function remline(id,text) {
+	$('#content_'+id).prev().find('div').append(text);
+	$('#content_'+id).prev().find('textarea').append(text);
+	$('#content_'+id).remove();
+}
+
 // absatz zum ändern markieren
 function edit(id) {
 	$.ajax({
@@ -94,8 +110,6 @@ function save(id) {
 				}
 			}
 		});
-	}else{
-		console.log('nosave');
 	}
 }
 
@@ -113,8 +127,6 @@ function finish(id) {
 		success: function(data) {
 			if(data != 'fail') {
 				if(text == '') {
-					console.log('nbsp');
-					//TODO
 					text = '&nbsp;';
 				}
 				$('#content_div_'+id).html(text);
@@ -129,8 +141,6 @@ function finish(id) {
 
 // lebenszeichen vom user
 function lifesign(id) {
-	console.log('start lifesign');
-	
 	if(timeout != false) {
 		clearTimeout(timeout);
 	}
@@ -141,12 +151,10 @@ function lifesign(id) {
 	
 	timeout = setTimeout(function() {
 		finish(id);
-		console.log("timeout");
 	},60000);
 	
 	updater = setTimeout(function() {
 		save(id);
-		console.log('zwischenspeichern');
 	},5000);
 }
 
@@ -169,7 +177,6 @@ function backspace(id) {
 		cache: false,
 		timeout:1000,
 		success: function(data) {
-			console.log(data);
 			if(data != 'fail' && data != 'block') {
 				d = JSON.parse(data);
 				$('#content_'+id).remove();
@@ -190,7 +197,6 @@ function checkInput(id) {
 	match = /\r|\n/.exec(text);
 	if (match) {
 		text = text.split('\n');
-		console.log(text);
 		$('#content_text_'+id).val(text[0]);
 		$.ajax({
 			type: "POST",
@@ -226,28 +232,24 @@ function checkInput(id) {
 
 // wenn logpoll neue daten hat
 function response(d) {
-	//d = JSON.parse(data);
-	console.log(d);
-	switch (d.type) {
+	switch (d.t) {
 		case 'block':
-			block(d.id);
+			block(d.l);
 			break;
 		case 'unblock':
-			unblock(d.id);
+			unblock(d.l);
 			break;
 		case 'add':
-			//TODO
+			d2 = JSON.parse(d.d);
+			addline(d.l,d2.newid,d2.text);
 			break;
 		case 'remove':
-			//TODO
+			remline(d.l,d.d);
 			break;
 		case 'change':
-			//TODO
+			change(d.l,d.d)
 			break;
-		
 	}
-	console.log("response:");
-	console.log(d);
 }
 
 //update funktion für live update
@@ -267,7 +269,6 @@ function longpoll() {
 					last = json.last;
 				}
 				if(json.data != undefined) {
-					//console.log(json.data);
 					for(i=0;i<json.data.length;i++) {
 						response(json.data[i]);
 					}
@@ -296,7 +297,6 @@ $( document ).ready(function() {
 	});
 	
 	$('.document').on( "blur",".content_text", function(event) {
-		console.log("blur");
 		id = event.currentTarget.id.split('_')[2];
 		finish(id);
 	});

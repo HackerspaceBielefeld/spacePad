@@ -20,6 +20,7 @@ if(isset($_POST['submit'])) {
 	
 	$sql->set("CREATE TABLE IF NOT EXISTS `changes` (
 	  `changeID` int(11) NOT NULL AUTO_INCREMENT,
+	  `writerID` int(11) NOT NULL,
 	  `docID` int(11) NOT NULL,
 	  `lineID` int(11) NOT NULL,
 	  `typ` varchar(10) CHARACTER SET utf8 NOT NULL,
