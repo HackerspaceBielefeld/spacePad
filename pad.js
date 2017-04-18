@@ -1,7 +1,7 @@
 var updater = false;
 var timeout = false;
 var focuson = false;
-var last = 0;
+var tabID = false;
 
 // ermittelt position des cursors in textarea
 (function ($, undefined) {
@@ -56,7 +56,7 @@ function unblock(id) {
 function edit(id) {
 	$.ajax({
 		type: "GET",
-		url: "ajax.php?a=edit&doc="+doc +"&line="+id,
+		url: "ajax.php?a=edit&doc="+doc +"&line="+id+"&writer="+cookie,
 
 		async: true,
 		cache: false,
@@ -65,7 +65,6 @@ function edit(id) {
 			if(data == 'true') {
 				$('#content_div_'+id).hide();
 				$('#content_text_'+id).show().focus();
-				
 			}else{
 				block(id);
 			}
@@ -78,12 +77,13 @@ function save(id) {
 	if($('#content_text_'+id).val() != $('#content_div_'+id).html()){
 		text = $('#content_text_'+id).val();
 		$.ajax({
-			type: "GET",
-			url: "ajax.php?a=save&doc="+doc +"&line="+id+"&text="+encodeURI(text),
-
+			type: "POST",
+			url: "ajax.php?a=save&doc="+doc +"&line="+id+"&writer="+cookie,
+			data: {text: text},
+			
 			async: true,
 			cache: false,
-			timeout:1000,
+			timeout:10000,
 			success: function(data) {
 				if(data == 'true') {
 					$('#content_div_'+id).html(text);
@@ -103,8 +103,9 @@ function save(id) {
 function finish(id) {
 	text = $('#content_text_'+id).val();
 	$.ajax({
-		type: "GET",
-		url: "ajax.php?a=save&doc="+doc +"&line="+id +"&text="+encodeURI(text),
+		type: "POST",
+		url: "ajax.php?a=save&b=unblock&doc="+doc +"&line="+id+"&writer="+cookie,
+		data : {text:text},
 
 		async: true,
 		cache: false,
@@ -123,7 +124,7 @@ function finish(id) {
 				//block(id);
 			}
 		}
-	});
+	})
 }
 
 // lebenszeichen vom user
@@ -157,8 +158,30 @@ function adjustTextarea(id) {
 }
 
 // zwei absätze zusammenführen
-function concat(id) {
-	
+function backspace(id) {
+	text = $('#content_text_'+id).val();
+	$.ajax({
+		type: "POST",
+		url: "ajax.php?a=cat&doc="+doc+"&line="+id+"&writer="+cookie,
+		data: {text: text},
+
+		async: true,
+		cache: false,
+		timeout:1000,
+		success: function(data) {
+			console.log(data);
+			if(data != 'fail' && data != 'block') {
+				d = JSON.parse(data);
+				$('#content_'+id).remove();
+				edit(d.id);
+				len = $('#content_text_'+d.id).val().length;
+				$('#content_text_'+d.id).val(d.text);
+				setCursorPos('content_text_'+d.id, len)
+			}else if(data == 'block') {
+				altert('blocked');
+			}
+		},
+	});
 }
 
 function checkInput(id) {
@@ -170,8 +193,12 @@ function checkInput(id) {
 		console.log(text);
 		$('#content_text_'+id).val(text[0]);
 		$.ajax({
-			type: "GET",
-			url: "ajax.php?a=add&doc="+doc+"&line="+id +"&text="+encodeURI(text[1])+"&text2="+encodeURI(text[0]),
+			type: "POST",
+			url: "ajax.php?a=add&doc="+doc+"&line="+id+"&writer="+cookie,
+			data: {
+				text: text[1],
+				text2: text[0]
+			},
 
 			async: true,
 			cache: false,
@@ -198,11 +225,10 @@ function checkInput(id) {
 }
 
 // wenn logpoll neue daten hat
-function response(data) {
-	d = JSON.parse(data);
+function response(d) {
+	//d = JSON.parse(data);
+	console.log(d);
 	switch (d.type) {
-		case 'heartbeat':
-			break;
 		case 'block':
 			block(d.id);
 			break;
@@ -221,7 +247,7 @@ function response(data) {
 		
 	}
 	console.log("response:");
-	console.log(data);
+	console.log(d);
 }
 
 //update funktion für live update
@@ -229,15 +255,24 @@ function longpoll() {
 	if(doc > 0) {
 		$.ajax({
 			type: "GET",
-			url: "ajax.php?doc="+doc+"&last="+last,
+			url: "ajax.php?doc="+doc+"&last="+last+"&writer="+cookie,
 
 			async: true,
 			cache: false,
 			timeout:35000,
 
 			success: function(data) {
-				response(data);
-				
+				json = JSON.parse(data);
+				if(json.last > last) {
+					last = json.last;
+				}
+				if(json.data != undefined) {
+					//console.log(json.data);
+					for(i=0;i<json.data.length;i++) {
+						response(json.data[i]);
+					}
+				}
+					
 				setTimeout(
 					longpoll,
 					1000
@@ -247,7 +282,7 @@ function longpoll() {
 				
 				setTimeout(
 					longpoll,
-					15000);
+					10000);
 			}
 		});
 	}
@@ -276,17 +311,15 @@ $( document ).ready(function() {
 		lifesign(id);
 	});
 	
-	$('.content_text').keyup(function(e){
-		if(e.keyCode == 8) {
+	$('.document').on("keyup",".content_text", function(event){
+		if(event.keyCode == 8) {
 			id = event.currentTarget.id.split('_')[2];
 			cur = $('#content_text_'+id).getCursorPosition();
 			if(cur == 0) {
-				
+				backspace(id);
 			}
 		}
 	});
 	
 	longpoll();
 });
-
- // )  

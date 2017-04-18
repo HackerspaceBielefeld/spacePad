@@ -5,6 +5,18 @@ if(!file_exists('config.php')) {
 	echo 'install.php muss entfernt werden.';
 	die();
 }
+
+require('config.php');
+require('func.php');
+
+if(!isset($_GET['i']) && isset($_POST['submit'])) {
+	$id = $sql->set("INSERT INTO docs (docName) VALUES (?)","s",array($_POST['name']),true);
+	if($id) {
+		$sql->set("INSERT INTO `lines` (docID) VALUES (?)","i",array($id));
+		header('Location: ./?i='.$id);
+		die();
+	}
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -18,41 +30,25 @@ if(!file_exists('config.php')) {
 	</head>
 	<body id="index">
 <?php
-require('config.php');
-require('func.php');
 //altes zeug wegräumen
 $sql->set("DELETE FROM writer WHERE writerTimeout < NOW();");
 
 $alt = date("Y-m-d H:i:s",time()-(60*60*24));
 $sql->set("DELETE FROM changes WHERE changed < ?",'s',array($alt));
-
-//user cookie prüfen
-if(isset($_COOKIE['writer'])) {
-	$tmp = $sql->get("SELECT * FROM writer WHERE writerCookie = ?","s",array($_COOKIE['writer']));
-}else{
-	$tmp = false;
-}
-
-$time = time()+(60*60*24);
-if($tmp) {
-	$sql->set("UPDATE writer SET writerTimeout = ? WHERE writerID = ?","si",array(date("Y-m-d H:i:s",$time),$tmp[0]['writerID']));
-	setCookie('writer',$tmp[0]['writerCookie'],$time,'/');
-	$writer = array('id'=>$tmp[0]['writerID'],'name'=>$tmp[0]['writerName']);
-}else{
-	do {
-		$cookie = random(75);
-	} while(!$sql->set("INSERT INTO writer (writerCookie,writerTimeout) VALUES (?,?)","ss",array($cookie, date("Y-m-d H:i:s",$time))));
-	setCookie('writer',$cookie,$time,'/');
-}
 /////////////////////////////////////////
 if(isset($_GET['i'])) {
 	$doc = $sql->get("SELECT * FROM docs WHERE docID = ?","i",array($_GET['i']));
 	if($doc) {
+		do {
+			$cookie = random(75);
+			$userID = $sql->set("INSERT INTO writer (writerCookie,writerTimeout) VALUES (?,?)","ss",array($cookie, date("Y-m-d H:i:s",time())),true);
+		} while(!$userID);
+		
 		echo '<h1>Space-Pad: '. $doc[0]['docName'] .'</h1>
-			<script type="text/javascript" charset="utf-8">var doc = '. $_GET['i'] .';</script>
+			<script type="text/javascript" charset="utf-8">var doc = '. $_GET['i'] .'; var last = '. $doc[0]['lastChange'] .'; var cookie = "'. $cookie .'"</script>
 		<div class="document">';
 			
-		$lines = $sql->get("SELECT * FROM line WHERE docID = ? ORDER BY lineID","i",array($_GET['i']));
+		$lines = $sql->get("SELECT * FROM `lines` WHERE docID = ? ORDER BY lineID","i",array($_GET['i']));
 		$dann = 0;
 		if($lines) {
 			$zeilen = array();
@@ -83,6 +79,13 @@ if(isset($_GET['i'])) {
 	if($data) foreach($data as $d) {
 		echo '<a href="/?i='. $d['docID'] .'" class="list">'. $d['docName'] .'</a>';
 	}
+	echo '<div>
+		<form action="index.php" method="post">
+			Neues Pad
+			<input name="name" />
+			<input type="submit" name="submit" value="erstellen" />
+		</form>
+	</div>';
 }
 ?>
 		</div>

@@ -8,7 +8,7 @@ div.content_div {
 	width: 100%;
 	display: block;
 	overflow: auto;
-	border: 5px solid green;
+	
 	font-family: Courier New;
 	resize: none;	
 	margin-bottom: 20px;
@@ -29,7 +29,7 @@ textarea.content_text {
 	width: 100%;
 	display: block;
 	overflow: auto;
-	border: 5px solid red;
+	background-color: #afffaf;
 	font-family: Courier New;
 	resize: none;
 	font-size: 16px;

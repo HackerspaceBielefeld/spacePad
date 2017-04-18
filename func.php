@@ -17,9 +17,6 @@
 			try {
 				$statement = $this->h->prepare($que);
 				
-				$args = array_merge([$t],$p);
-				//call_user_func_array([$statement,'bind_param'],$args);
-				//*
 				switch (count($p)) {
 					case 0: break;
 					case 1: $statement->bind_param($t, $p[0]); break;
@@ -32,7 +29,8 @@
 					case 8: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7]); break;
 					case 9: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7], $p[8]); break;
 					case 10: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7], $p[8], $p[9]); break;
-				}//*/
+				}
+				
 				$statement->execute();	
 
 				$ret = array();
@@ -58,22 +56,20 @@
 		
 		public function set($que,$t='',$p=array(),$id=false) {
 			$statement = $this->h->prepare($que);
-			$args = array_merge([$t],$p);
-			//call_user_func_array([$statement,'bind_param'],$args);
-			//*
+			
 			switch (count($p)) {
-				case 0: break;
-				case 1: $statement->bind_param($t, $p[0]); break;
-				case 2: $statement->bind_param($t, $p[0], $p[1]); break;
-				case 3: $statement->bind_param($t, $p[0], $p[1], $p[2]); break;
-				case 4: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3]); break;
-				case 5: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4]); break;
-				case 6: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5]); break;
-				case 7: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6]); break;
-				case 8: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7]); break;
-				case 9: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7], $p[8]); break;
-				case 10: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7], $p[8], $p[9]); break;
-			}//*/
+					case 0: break;
+					case 1: $statement->bind_param($t, $p[0]); break;
+					case 2: $statement->bind_param($t, $p[0], $p[1]); break;
+					case 3: $statement->bind_param($t, $p[0], $p[1], $p[2]); break;
+					case 4: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3]); break;
+					case 5: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4]); break;
+					case 6: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5]); break;
+					case 7: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6]); break;
+					case 8: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7]); break;
+					case 9: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7], $p[8]); break;
+					case 10: $statement->bind_param($t, $p[0], $p[1], $p[2], $p[3], $p[4], $p[5], $p[6], $p[7], $p[8], $p[9]); break;
+				}
 			
 			$statement->execute();
 			if($id) {

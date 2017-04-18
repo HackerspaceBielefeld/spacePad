@@ -21,7 +21,9 @@ if(isset($_POST['submit'])) {
 	$sql->set("CREATE TABLE IF NOT EXISTS `changes` (
 	  `changeID` int(11) NOT NULL AUTO_INCREMENT,
 	  `docID` int(11) NOT NULL,
-	  `json` text NOT NULL,
+	  `lineID` int(11) NOT NULL,
+	  `typ` varchar(10) CHARACTER SET utf8 NOT NULL,
+	  `data` text NOT NULL,
 	  `changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	  PRIMARY KEY (`changeID`)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
@@ -37,7 +39,7 @@ if(isset($_POST['submit'])) {
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 	echo '<div>Docs Tabelle erzeugt...</div>';
 	
-	$sql->set("CREATE TABLE IF NOT EXISTS `line` (
+	$sql->set("CREATE TABLE IF NOT EXISTS `lines` (
 	  `lineID` int(11) NOT NULL AUTO_INCREMENT,
 	  `docID` int(11) NOT NULL,
 	  `content` text CHARACTER SET utf8 NOT NULL,
