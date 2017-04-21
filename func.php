@@ -88,6 +88,10 @@
 	function chk($str) {
 		return str_replace("'",'"',$str);
 	}
+	
+	function chkHTML($str) {
+		return str_replace(['<','>'],['&lt;','&gt;'],$str);
+	}
 
 	function random($name_laenge) {
 		$zeichen = "abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRTSUVWXYZ0123456789";

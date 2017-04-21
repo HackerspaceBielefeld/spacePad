@@ -10,7 +10,7 @@ require('config.php');
 require('func.php');
 
 if(!isset($_GET['i']) && isset($_POST['submit'])) {
-	$id = $sql->set("INSERT INTO docs (docName) VALUES (?)","s",array($_POST['name']),true);
+	$id = $sql->set("INSERT INTO docs (docName) VALUES (?)","s",array(chkHTML($_POST['name'])),true);
 	if($id) {
 		$sql->set("INSERT INTO `lines` (docID) VALUES (?)","i",array($id));
 		header('Location: ./?i='.$id);

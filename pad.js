@@ -42,6 +42,11 @@ function setCursorPos(elemId, caretPos) {
     }
 }
 
+function textFilter(str) {
+	str = str.replace('<','&lt;');
+	return str.replace('>','&gt;');
+}
+
 //absatz blocken weil bearbeitung durch anderen
 function block(id) {
 	$('#content_div_'+id).addClass('content_block').removeClass('content_div');
@@ -102,7 +107,7 @@ function save(id) {
 			timeout:10000,
 			success: function(data) {
 				if(data == 'true') {
-					$('#content_div_'+id).html(text);
+					$('#content_div_'+id).html(textFilter(text));
 					$('#content_div_'+id).hide();
 					$('#content_text_'+id).show();
 				}else{
@@ -129,7 +134,7 @@ function finish(id) {
 				if(text == '') {
 					text = '&nbsp;';
 				}
-				$('#content_div_'+id).html(text);
+				$('#content_div_'+id).html(textFilter(text));
 				$('#content_div_'+id).show();
 				$('#content_text_'+id).hide();
 			}else{

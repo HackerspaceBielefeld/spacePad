@@ -36,7 +36,7 @@ if($data) {
 
 	if($a == 'add') {
 		$line = $_GET['line'];
-		$text = $_POST['text'];
+		$text = chkHTML($_POST['text']);
 		$doc = $_GET['doc'];
 		
 		$data = $sql->get("SELECT * FROM `lines` WHERE docID = ? AND lineID = ?","ii",array($doc,$line));
@@ -58,7 +58,7 @@ if($data) {
 	if($a == 'cat') {
 		$doc = $_GET['doc'];
 		$line = $_GET['line'];
-		$text = $_POST['text'];
+		$text = chkHTML($_POST['text']);
 		
 		$data = $sql->get("SELECT * FROM `lines` WHERE danach = ? AND docID = ?","ii",array($line,$doc));
 		if(isset($data[0])) {
@@ -84,7 +84,7 @@ if($data) {
 	if($a == 'save'){
 		$doc = $_GET['doc'];
 		$line = $_GET['line'];
-		$text = $_POST['text'];
+		$text = chkHTML($_POST['text']);
 
 		if(isset($_GET['b']) && $_GET['b'] == 'unblock') {
 			$sql->set("UPDATE `lines` SET content = ?, exclusive = '' WHERE lineID = ? AND docID = ?","sii",array($text,$line,$doc));
